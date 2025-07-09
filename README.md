@@ -1,15 +1,32 @@
 ## Requerimientos del sistema
 
+- AutoIt3
+- git
+  - https://github.com/drojasl/amazon-scraping
 - phyton
-- pip install b64
+- pip install requests
+- pip install beautifulsoup4
 - pip install python-dotenv
 
-## Orden de ejecución
+## Preparacion de ejecución
 
-# Ejecutar scripts
+- Abrir navegador web (DEBE quedar ubicado en la esquina superior izquierda)
+- Entrar a Amazon
+- Verificar que tenga el ZIPCODE 33166-2623
+- Guardar una pagina
+  - ruta al proyecto /amazon_scraping/pages
+- Verificar que el idioma sea Español
+- Abrir al menos 4 o 5 pestañas
 
-# Ejecutar programa de AutoIt
+# run once a week
 
-- Abrir navegador web
-- Abrir al menos 4 pestañas
-- Ejecutar src/autoit/saveAmazon.au3
+python -m src.scripts.add_new_items_to_db
+
+# run once per day
+
+python -m src.scripts.get_sku_list
+
+# always running
+
+python -m index
+python -m src.scripts.scraping_local_page

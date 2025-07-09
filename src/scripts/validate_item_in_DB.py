@@ -1,19 +1,14 @@
 import sys
-import requests
-import sqlite3
-from protected.config import API_URL, DB_PATH
+from protected.config import API_URL
 from src.scripts.auth import get_access_token, get_validated_token
-from src.lib.dolar_hoy import get_trm_banrep
 
-def is_item_in_DB(item_id):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
+def is_item_in_DB(cursor, item_id):
     cursor.execute("SELECT sku FROM items WHERE item_id=?", (item_id,))
     row = cursor.fetchone()
 
     if row and row[0]:
-        print(item_id + " Already on DB")
-        return True
+        if row and row[0] == 'N/A':
+            return -1   # -1 to update SKU
+        return 1        # 1 if item is in DB with SKU
 
-    return False
+    return 0            # Not in DB at all

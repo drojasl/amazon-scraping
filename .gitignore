@@ -1,3 +1,6 @@
+protected
 pages
 sample_pages
 src/autoit/inputs
+__pycache__/
+logs/*

@@ -2,6 +2,7 @@ from protected.config import API_URL, CLIENT_ID, SECRET_KEY, DB_PATH, SELLER_ID
 import sys
 import sqlite3
 import requests
+from src.lib.logger import log
 
 def get_validated_token():
     token, refresh = get_access_token()
@@ -44,9 +45,7 @@ def refresh_access_token(refresh):
             'content-type': 'application/x-www-form-urlencoded'
         }
 
-        print("REFRESCAR")
         response = requests.post(url, headers=headers, data=payload)
-        print(response)
         response.raise_for_status()
         
         token_data = response.json()
@@ -56,11 +55,6 @@ def refresh_access_token(refresh):
         
         new_access = token_data['access_token']
         new_refresh = token_data.get('refresh_token', refresh)
-
-        print("---------")
-        print(new_access)
-        print(new_refresh)
-        print("---------")
 
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
@@ -93,19 +87,16 @@ def validate_token(token, refresh):
     url = API_URL + "/users/" + SELLER_ID + "/items/search?"
 
     payload = {}
-    headers = {
-    'Authorization': "Bearer " + token
-    }
+    headers = {'Authorization': "Bearer " + token}
     try:
         response = requests.request("GET", url, headers=headers, data=payload)
         if response.status_code == 401:
             error_data = response.json()
-            print(error_data)
             if error_data.get('error') == 'not_found' and error_data.get('message') == 'invalid_token':
-                print("Error: Token inválido o expirado")
+                print("Token expirado")
                 refresh_access_token(refresh)
 
     except requests.exceptions.HTTPError as err:
-        print("ERROR")
-        print(err)
+        print("Authentication error")
+        log("auth_error", f"Error validating token: {err}")
 

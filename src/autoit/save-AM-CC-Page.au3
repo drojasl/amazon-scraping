@@ -1,93 +1,120 @@
-Global $stopFlag = False
 Global $inputFolder = @ScriptDir & "\inputs"
+Local $loadWait = 3000
+Local $downloadWait = 7000
+Local $startTimer = TimerInit()
 
-HotKeySet("^!x", "_StopExecution") ; Ctrl+Alt+X para detener la ejecución
+; Get initial time
+Local $startHour = @HOUR
+Local $startMin = @MIN
+Local $startSec = @SEC
 
-While 1
-    If $stopFlag Then
-        MsgBox(0, "Info", "Ejecución detenida por el usuario.")
-        Exit
-    EndIf
+ConsoleWrite("Hora de Inicio: " & StringFormat("%02d:%02d:%02d", $startHour, $startMin, $startSec) & @CRLF)
 
-    Local $search = FileFindFirstFile($inputFolder & "\*.txt")
+Sleep(3000)
 
-    If $search <> -1 Then
-		Local $file = FileFindNextFile($search)
-		$src = "AZ"
-		If StringLeft($file, 3) = "CC-" Then
-			$src = "CC"
+Local $counter = 1
+While $counter <= 2
+	Local $searchHandle = FileFindFirstFile($inputFolder & "\*.txt")
+
+	If $searchHandle <> -1 Then
+		Local $fileName = FileFindNextFile($searchHandle)
+		ConsoleWrite($counter & " Archivo a procesar: " & $fileName & @CRLF)
+
+		$source = "AZ"
+		If StringLeft($fileName, 3) = "CC-" Then
+			$source = "CC"
 		EndIf
 
-		Local $filePath = $inputFolder & "\" & $file
-		Local $codigos = FileReadToArray($filePath)
+		Local $filePath = $inputFolder & "\" & $fileName
+		Local $codes = FileReadToArray($filePath)
 
 		If @error Then
 			ConsoleWrite("Error al leer archivo: " & $filePath & @CRLF)
 			ContinueLoop
 		EndIf
 
-		_Save($codigos, $src)
-		
-		FileDelete($filePath)
+		_Save($codes, $source)
 
-        FileClose($search)
-    Else
-		MsgBox(0, "Info", "No se encontraron archivos. Esperando 60 segundos...")
-        Sleep(60000) ; Esperar 60 segundos
-    EndIf
+		FileDelete($filePath)
+		FileClose($searchHandle)
+	Else
+		ConsoleWrite("No hay archivos para procesar. Exit")
+		MsgBox(0, "Tiempo de ejecución", "No hay archivos para procesar")
+		Exit
+	EndIf
+
+	$counter += 1
 WEnd
 
-Func _Save($codigos, $src)
-	Sleep(3000);
-	
-	For $codigo In $codigos
-		If $stopFlag Then
-			ExitLoop
-		EndIf
+Local $elapsed = TimerDiff($startTimer)
 
+; Convert to seconds
+Local $totalSeconds = Int($elapsed / 1000)
+
+; Calculate hours, minutes, and seconds
+Local $elapsedHours = Int($totalSeconds / 3600)
+Local $elapsedMinutes = Int(Mod($totalSeconds, 3600) / 60)
+Local $elapsedSeconds = Mod($totalSeconds, 60)
+
+; Get end time
+Local $endHour = @HOUR
+Local $endMin = @MIN
+Local $endSec = @SEC
+
+; Show result
+ConsoleWrite("FIN -> Tiempo transcurrido: " & $elapsedHours & "h " & $elapsedMinutes & "m " & $elapsedSeconds & "s" & @CRLF)
+ConsoleWrite("Hora de finalizacion: " & StringFormat("%02d:%02d:%02d", $endHour, $endMin, $endSec) & @CRLF)
+Exit
+
+Func _Save($codes, $source)
+	Local $i = 1
+	For $code In $codes
 		Sleep(500)
+		MouseClick("left", 0, 0)
 
-		$url = "https://www.amazon.com/dp/" & $codigo
-		If $src = 'CC' Then
-			$url = "https://camelcamelcamel.com/product/" & $codigo
+		$url = "https://www.amazon.com/dp/" & $code
+		If $source = 'CC' Then
+			$url = "https://camelcamelcamel.com/product/" & $code
 		EndIf
 
 		ClipPut($url)
 		ClipPut($url)
-		send("{Esc}")
+		Send("{Esc}")
 		Send("{F6}")
-		Sleep(1000)
-		Send("^v")
-		Sleep(1000)
-		send("{Enter}")
-		
-		; Esperar carga
-		$file_name = $src & "-" & $codigo
-		ClipPut($file_name)
-		Sleep(4500)
-		ClipPut($file_name)
-
-		; Guardar
-		send("{Esc}")
-		Send("^s")
-		Sleep(3000)
-		Send("^v")
-		Sleep(1000)
-		send("{Enter}")
-
-		; Alert Reemplazar
 		Sleep(500)
-		send("{Esc}")
-		send("{Enter}")
-		
-		; Esperar descarga
-		Sleep(8000)
-		send("{Esc}")
+		MouseClick("left", 0, 0)
+		Send("^v")
+		Sleep(500)
+		Send("{Enter}")
+
+		; Wait for page load
+		$fileName = $source & "-" & $code
+		ClipPut($fileName)
+		Sleep($loadWait)
+		MouseClick("left", 0, 0)
+		ClipPut($fileName)
+
+		; Save page
+		Send("{Esc}")
+		Send("^s")
+		Sleep(2000)
+		MouseClick("left", 0, 0)
+		Send("^v")
+		Sleep(3000)
+		MouseClick("left", 0, 0)
+		Send("{Enter}")
+
+		; Confirm overwrite alert
+		Sleep(500)
+		Send("{Esc}")
+		Send("{Enter}")
+
+		; Wait for download
+		Sleep($downloadWait)
+		ConsoleWrite($i & " " & $code & @CRLF)
+		MouseClick("left", 0, 0)
+		Send("{Esc}")
 		Send("^{TAB}")
-    Next
-
+		$i += 1
+	Next
 EndFunc   ;==>_Save
-
-Func _StopExecution()
-    $stopFlag = True
-EndFunc

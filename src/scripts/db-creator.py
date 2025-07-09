@@ -32,8 +32,9 @@ CREATE TABLE IF NOT EXISTS items (
     item_id TEXT NOT NULL,
     title TEXT NOT NULL,
     permalink TEXT NOT NULL,
-    price TEXT NOT NULL,
-    dollar TEXT NOT NULL,
+    base_pesos_price TEXT NOT NULL,
+    base_dollar_price TEXT NULL,
+    initial_dollar_value TEXT NOT NULL,
     status TEXT NOT NULL,
     sku TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -45,8 +46,9 @@ cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_item_id ON items (item_id)
 conn.commit()
 
 # 3. Insertar datos de ejemplo
+'''
 cursor.execute("""
-INSERT INTO items (item_id, title, permalink, price, dollar, status, sku, created_at, updated_at) 
+INSERT INTO items (item_id, title, permalink, base_pesos_price, initial_dollar_value, status, sku, created_at, updated_at) 
 VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
 """, (
     'MCO462494879',
@@ -59,9 +61,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
 ))
 #conn.commit()
 
-cursor.execute("SELECT id, item_id, title, permalink, price, dollar, status, sku, created_at, updated_at FROM items")
+cursor.execute("SELECT id, item_id, title, permalink, base_pesos_price, initial_dollar_value, status, sku, created_at, updated_at FROM items")
 for row in cursor.fetchall():
     print(f"{row[0]}: {row[1]}: {row[2]}: {row[3]}: {row[4]}: {row[5]}: {row[6]}: {row[7]}: {row[8]}: {row[9]}")
-
+'''
 # 6. Cerrar conexión
 conn.close()

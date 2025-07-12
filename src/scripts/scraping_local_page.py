@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import time
+import quopri
 from datetime import datetime, timedelta
 import shutil
 from bs4 import BeautifulSoup
@@ -17,7 +18,7 @@ def add_codigo_retries(codigo, filename="src/autoit/inputs/CC-retries.txt"):
         print(f"Error al escribir en el archivo {filename}: {e}")
 
 def extract_product_info(soup):
-    # Diccionario de patrones (origen: patrón)
+    # Diccionario de patrones (origen: patrón)    
     patterns = {
         'AZ': [
             r'amazon\.com/dp/([A-Z0-9]{10})',
@@ -29,16 +30,19 @@ def extract_product_info(soup):
             r'camelcamelcamel\.com/[^/]+/product/([A-Z0-9]{10})'
         ]
     }
-    
-    comments = soup.find_all(string=lambda text: isinstance(text, str) and 'saved from url' in text)
-    
-    for comment in comments:
-        for source, regex_list in patterns.items():
-            for pattern in regex_list:
-                match = re.search(pattern, comment)
-                if match:
-                    return match.group(1), source
-    
+
+    # Buscar en todo el contenido del archivo como texto plano
+    html_text = str(soup)
+
+    # Solo analizar las primeras líneas (más rápido)
+    first_lines = "\n".join(html_text.splitlines()[:30])
+
+    for source, regex_list in patterns.items():
+        for pattern in regex_list:
+            match = re.search(pattern, first_lines)
+            if match:
+                return match.group(1), source
+
     return None, None
 
 def extract_price(valor_str):
@@ -55,6 +59,7 @@ def extract_price(valor_str):
     return None
 
 def clean_files(file_path, files_dir, move=True, subdir='otros'):
+    move = True
     if move:
         print(subdir, file_path)
         destino_dir = os.path.join("pages", subdir)
@@ -115,16 +120,18 @@ def item_cannot_be_sent(soup):
     return all(condiciones)
 
 def get_price(soup, codigo, file_path):
-    section = soup.find(id='apex_offerDisplay_desktop')
+    section = soup.find(id='corePriceDisplay_desktop_feature_div')
 
     if not section:
-        section = soup.find(id='corePriceDisplay_desktop_feature_div')
+        section = soup.find(id='corePrice_desktop')
 
     if section:
         price = section.find(class_='a-price')
         if price:
             price_value = extract_price(price.get_text(strip=True))
-            update_item(file_path, codigo, price_value, 'active')
+            log("price_extracted", f"Item {codigo} price extracted: {price_value}")
+            print(f"{codigo}: Precio encontrado: {price_value}")
+            # update_item(file_path, codigo, price_value, 'active')
             return True
         else:
             print(f"{codigo}: No se encontró el precio.")
@@ -137,24 +144,29 @@ def get_price(soup, codigo, file_path):
 def amazon_scraping(soup, codigo, file_path, files_dir):
     if page_catcha(soup):
         log("page_catcha", f"Item {codigo} display catcha.")
+        clean_files(file_path, files_dir, False, 'catcha')
         return False
 
     if page_not_found(soup):
         log("page_not_found", f"Item {codigo} not found.")
-        update_item(file_path, codigo, None, 'paused')
+        clean_files(file_path, files_dir, False, 'page_not_found')
+        # update_item(file_path, codigo, None, 'paused')
         return False
 
     if item_not_available(soup):
         log("item_not_available", f"Item {codigo} not available.")
-        update_item(file_path, codigo, None, 'paused')
+        clean_files(file_path, files_dir, False, 'item_not_available')
+        # update_item(file_path, codigo, None, 'paused')
         return False
 
     if item_cannot_be_sent(soup):
         log("item_cannot_be_sent", f"Item {codigo} cannot be sent.")
-        update_item(file_path, codigo, None, 'paused')
+        clean_files(file_path, files_dir, False, 'item_cannot_be_sent')
+        # update_item(file_path, codigo, None, 'paused')
         return False
 
     if get_price(soup, codigo, file_path):
+        clean_files(file_path, files_dir, False, 'OK')
         return False
 
     print(f"***** {codigo} NO FILTRADO *****")
@@ -174,7 +186,7 @@ def procesar_archivo_mas_antiguo():
     path = './pages'
 
     # Listar archivos HTML válidos
-    archivos = [f for f in os.listdir(path) if f.endswith('.html')]
+    archivos = [f for f in os.listdir(path) if f.endswith('.mhtml')]
     if not archivos:
         print("No hay archivos HTML para procesar.")
         time.sleep(30)
@@ -202,7 +214,8 @@ def procesar_archivo_mas_antiguo():
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
 
-        soup = BeautifulSoup(content, 'html.parser')
+        decoded = quopri.decodestring(content).decode("utf-8", errors="ignore")
+        soup = BeautifulSoup(decoded, 'html.parser')
         codigo, src = extract_product_info(soup)
 
         if codigo == None or src == None:

@@ -4,9 +4,9 @@
 - git
   - https://github.com/drojasl/amazon-scraping
 - phyton
-- pip install requests
-- pip install beautifulsoup4
-- pip install python-dotenv
+  - pip install requests
+  - pip install beautifulsoup4
+  - pip install python-dotenv
 
 ## Preparacion de ejecución
 

@@ -1,6 +1,8 @@
 protected
+protected/config.py
 pages
 sample_pages
 src/autoit/inputs
 __pycache__/
 logs/*
+*.bat

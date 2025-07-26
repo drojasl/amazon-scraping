@@ -1,6 +1,6 @@
 Global $inputFolder = @ScriptDir & "\inputs"
-Global $loadWait = 1800
-Global $downloadWait = 800
+Global $loadWait = 1950
+Global $downloadWait = 400
 Global $startTimer = TimerInit()
 
 HotKeySet("^!p", "_PauseExecution") ; Ctrl+Alt+P para pausar la ejecución
@@ -8,11 +8,11 @@ HotKeySet("^!x", "_StopExecution") ; Ctrl+Alt+X para detener la ejecución
 
 _LogNow("Hora de Inicio:")
 
-Sleep(3000)
-_BackToBrowser()
+Sleep(2000)
 
 Local $counter = 1
-While $counter <= 10
+While $counter <= 1
+	Send("{ESC}")
 	Local $searchHandle = FileFindFirstFile($inputFolder & "\*.txt")
 
 	If $searchHandle <> -1 Then
@@ -31,9 +31,9 @@ While $counter <= 10
 			ContinueLoop
 		EndIf
 
-		; Ejecutar solo si estamos antes del minuto 50
-		If @MIN >= 50 Then
-			_LogNow("Muy cerca de la hora en punto")
+		; Ejecutar solo si estamos antes del minuto 48
+		If @MIN >= 48 Then
+			_LogNow("Muy cerca de la siguiente ejecucion automatica")
 			_LogEnd()
 			Exit
 		EndIf
@@ -78,6 +78,7 @@ EndFunc
 
 ;--------------------------------------------
 Func _Save($codes, $source)
+	_ValidateDownloadsFolder()
 	Local $i = 1
 	For $code In $codes
 		Sleep(400)
@@ -89,42 +90,42 @@ Func _Save($codes, $source)
 
 		ClipPut($url)
 		Send("{F6}")
-		Sleep(400)
+		Sleep(500)
 		Send("^v")
-		Sleep(300)
+		Sleep(400)
 		Send("{Enter}")
 
-		Local $fileName = $source & "-" & $code
+		Local $fileName = $source & "-" & $code & "-" & $i
 		ClipPut($fileName)
 		Sleep($loadWait)
 		ClipPut($fileName)
 
 		Send("^s")
-		Sleep(700)
+		Sleep($loadWait)
 		Send("^v")
-		Sleep(200)
+		Sleep(600)
 		
 		If $i = 1 Then
 			Send("{TAB}")
-			Sleep(200)
-    		Send("{DOWN}")
-			Sleep(100)
-    		Send("{DOWN}")
-			Sleep(100)
-    		Send("{DOWN}")
-			Sleep(100)
+			Sleep(300)
     		Send("{DOWN}")
 			Sleep(200)
+    		Send("{DOWN}")
+			Sleep(200)
+    		Send("{DOWN}")
+			Sleep(200)
+    		Send("{DOWN}")
+			Sleep(300)
     		Send("{UP}")
-			Sleep(200)
+			Sleep(300)
 			Send("{Enter}")
-			Sleep(200)
+			Sleep(300)
 		EndIf
 
-		Sleep(200)
 		Send("{Enter}")
 		Sleep(300)
 		Send("{LEFT}")
+		Sleep(100)
 		Send("{Enter}")
 
 		Sleep($downloadWait)
@@ -135,9 +136,28 @@ Func _Save($codes, $source)
 	Next
 EndFunc
 
+Func _ValidateDownloadsFolder()
+	_BackToBrowser()
+	Local $url = "chrome://settings/downloads"
+	ClipPut($url)
+	Send("{F6}")
+	Sleep(1000)
+	Send("^v")
+	Sleep(500)
+	Send("{Enter}")
+	Sleep(2000)
+	Send("{TAB}")
+	Sleep(500)
+	Send("{TAB}")
+	Sleep(500)
+	Send("{Enter}")
+	Sleep(2000)
+	Send("{Enter}")
+EndFunc
+
 Func _BackToBrowser()
 	MouseClick("left", 0, 140)
-	Sleep(100)
+	Sleep(50)
 EndFunc
 
 Func _StopExecution()

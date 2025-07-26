@@ -43,7 +43,6 @@ def update_item(file_path, sku, current_dollar_price, new_status=''):
     rows = cursor.fetchall()
 
     resultados = []
-
     if rows:
         activos = [row for row in rows if row[5] == 'active']
 
@@ -52,7 +51,6 @@ def update_item(file_path, sku, current_dollar_price, new_status=''):
         else:
             resultados = [rows[-1]]
     else:
-        resultados = []
         print("Item not found in DB: sku: " + sku)
         log("Item_not_found_in_db", f"Sku {sku} not found in DB. File path: {file_path}")
 
@@ -64,7 +62,6 @@ def update_item(file_path, sku, current_dollar_price, new_status=''):
         initial_dollar_value = row[4]
         db_status = row[5]
 
-        print(item_id)
         if initial_dollar_price is None or initial_dollar_price == 0:
             cursor.execute("""
                 UPDATE items
@@ -98,6 +95,25 @@ def update_item(file_path, sku, current_dollar_price, new_status=''):
 
 def get_updated_price(initial_pesos_price, initial_dollar_price, initial_dollar_value):
     current_dollar_value = get_trm_banrep()
+    
+    original_pesos = 50000
+    original_dolar = 4000
+    original_price_dollar = 12.5
+    
+    nuevo_dolar = 4100
+    new_price_dollar = 15
+    new_pesos = 60250chrome://settings/downloads
+            
+            
+            https://www.amazon.com/dp/B0CRBK4JR6
+            AZ-B0CRBK4JR6-1 
+    
+    Como calcular el new_pesos
+    
+    
+   
+https://www.amazon.com/dp/B0CQK7D9WK
+   
     return int(initial_pesos_price)
 
 #update_item('B00000J48J', 10, 'active') # B002NSMERY, B07RNNMZW3, B00000J48J, B0D1FTH57Y, B0DNFSH3Y9

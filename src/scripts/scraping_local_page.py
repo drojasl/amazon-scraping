@@ -9,10 +9,39 @@ from bs4 import BeautifulSoup
 from src.scripts.update_item_ml import update_item
 from src.lib.logger import log
 
-def add_codigo_retries(codigo, filename="src/autoit/inputs/CC-retries.txt"):
+def get_line_count(filename):
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            return sum(1 for line in f)
+    except FileNotFoundError:
+        return 0
+    except Exception as e:
+        print(f"Error al contar líneas en el archivo {filename}: {e}")
+        return -1
+
+def add_codigo_retries(codigo, base_path="src/autoit/inputs/", max_lines=100):
+    if not os.path.exists(base_path):
+        os.makedirs(base_path)
+
+    archivos = os.listdir(base_path)
+    count = len([archivo for archivo in archivos if archivo.startswith('CC-')])
+    i = count -1 if count else 0
+    
+    name = f"CC-retries-{i}.txt"
+    filename = os.path.join(base_path, name)
+    
+    if os.path.exists(filename):
+        line_count = get_line_count(filename)
+
+        if line_count >= max_lines:
+            i+=1
+            name = f"CC-retries-{i}.txt"
+
+    filename = os.path.join(base_path, name)
     try:
         with open(filename, "a", encoding="utf-8") as f:
             f.write(f"{codigo}\n")
+            print(f"Código '{codigo}' agregado a '{filename}'")
 
     except Exception as e:
         print(f"Error al escribir en el archivo {filename}: {e}")
@@ -58,8 +87,13 @@ def extract_price(valor_str):
             return None
     return None
 
-def clean_files(file_path, files_dir, move=True, subdir='otros'):
-    move = True
+def clean_files(file_path, move=True, subdir='otros'):
+    print(file_path)
+    print()
+    print(move)
+    print()
+    print(subdir)
+    move=True
     if move:
         print(subdir, file_path)
         destino_dir = os.path.join("pages", subdir)
@@ -68,17 +102,17 @@ def clean_files(file_path, files_dir, move=True, subdir='otros'):
         # Mover archivo individual si existe
         if os.path.exists(file_path) and os.path.isfile(file_path):
             destino_archivo = os.path.join(destino_dir, os.path.basename(file_path))
-            shutil.move(file_path, destino_archivo)
-
-        # Mover carpeta si existe
-        if os.path.exists(files_dir) and os.path.isdir(files_dir):
-            destino_carpeta = os.path.join(destino_dir, os.path.basename(files_dir))
-            shutil.move(files_dir, destino_carpeta)
-
+            try:
+                shutil.move(file_path, destino_archivo)
+            except Exception as e:
+                log("error_processing_files", f"Error 2 processing file {file_path}: {e}")
+                print(f"ERROR: No se pudo mover el archivo {file_path}. Error: {e}")
     else:
-        os.remove(file_path)
-        if os.path.exists(files_dir):
-            shutil.rmtree(files_dir)
+        try:
+            os.remove(file_path)
+        except Exception as e:
+            log("error_processing_files", f"Error 3 processing file {file_path}: {e}")
+            print(f"ERROR: No se pudo eliminar el archivo {file_path}. Error: {e}")
 
 def page_catcha(soup):
     textos = [text for text in soup.stripped_strings]
@@ -140,34 +174,49 @@ def get_price(soup, codigo, file_path):
     
     return False
 
+def get_price_cc(soup, codigo, file_path):
+    section = soup.find(id='buy-box')
 
-def amazon_scraping(soup, codigo, file_path, files_dir):
+    if section:
+        price = section.find(class_='bgp')
+        if price:
+            price_value = extract_price(price.get_text(strip=True))
+            if price_value != None:                
+                log("price_extracted", f"Item {codigo} price extracted: {price_value}")
+                print(f"{codigo}: Precio encontrado: {price_value}")
+                # update_item(file_path, codigo, price_value, 'active')
+                return True
+            else:
+                print(f"{codigo}: No se encontró el precio.")
+        else:
+            print(f"{codigo}: No se encontró el precio.")
+    else:
+        print(f"{codigo}: No se encontró el contenedor")
+    
+    return False
+
+def amazon_scraping(soup, codigo, file_path):
     if page_catcha(soup):
         log("page_catcha", f"Item {codigo} display catcha.")
-        clean_files(file_path, files_dir, False, 'catcha')
-        return False
+        return [True, 'catcha']
 
     if page_not_found(soup):
         log("page_not_found", f"Item {codigo} not found.")
-        clean_files(file_path, files_dir, False, 'page_not_found')
         # update_item(file_path, codigo, None, 'paused')
-        return False
+        return [True, 'page_not_found']
 
     if item_not_available(soup):
         log("item_not_available", f"Item {codigo} not available.")
-        clean_files(file_path, files_dir, False, 'item_not_available')
         # update_item(file_path, codigo, None, 'paused')
-        return False
+        return [True, 'item_not_available']
 
     if item_cannot_be_sent(soup):
         log("item_cannot_be_sent", f"Item {codigo} cannot be sent.")
-        clean_files(file_path, files_dir, False, 'item_cannot_be_sent')
         # update_item(file_path, codigo, None, 'paused')
-        return False
+        return [True, 'item_cannot_be_sent']
 
     if get_price(soup, codigo, file_path):
-        clean_files(file_path, files_dir, False, 'OK')
-        return False
+        return [True, 'OK']
 
     print(f"***** {codigo} NO FILTRADO *****")
     log("unfiltered_items", f"Item {codigo} not filtered. Check manually.")
@@ -175,41 +224,14 @@ def amazon_scraping(soup, codigo, file_path, files_dir):
     # Add code to retry file using camelcamelcamel.com to get the price
     add_codigo_retries(codigo)
 
-    return True
+    return [True, 'unfiltered_items']
 
 
-def camel_scraping(soup):
-    clean_files(file_path, files_dir, True, 'invalidos')
-    return False
+def camel_scraping(soup, codigo, file_path):
+    price_found = get_price_cc(soup, codigo, file_path)
+    return [True, 'cc-ok' if price_found else 'cc-invalid']
 
-def procesar_archivo_mas_antiguo():
-    path = './pages'
-
-    # Listar archivos HTML válidos
-    archivos = [f for f in os.listdir(path) if f.endswith('.mhtml')]
-    if not archivos:
-        print("No hay archivos HTML para procesar.")
-        time.sleep(30)
-        sys.exit()
-
-    # Ordenar por fecha de modificación (ascendente)
-    archivos.sort(key=lambda f: os.path.getmtime(os.path.join(path, f)))
-
-    # Tomar el más antiguo
-    archivo = archivos[0]
-
-    ruta_archivo = os.path.join(path, archivo)
-    tiempo_modificacion = os.path.getmtime(ruta_archivo)
-    tiempo_actual = time.time()
-
-    if tiempo_actual - tiempo_modificacion <= 40:
-        print(f"El archivo {archivo} fue modificado recientemente. Esperando 60 segundos para procesar...")
-        time.sleep(30)
-        return
-
-    file_path = os.path.join(path, archivo)
-    files_dir = os.path.join(path, f'{archivo.replace('.html', '')}_files')
-
+def procesar_archivo(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
@@ -219,44 +241,62 @@ def procesar_archivo_mas_antiguo():
         codigo, src = extract_product_info(soup)
 
         if codigo == None or src == None:
-            log("invalid_files", f"Archivo no válido: {archivo}")
-            # Eliminar archivo y carpeta asociada
-            clean_files(file_path, files_dir, False, 'invalidos') #True
+            log("invalid_files", f"Archivo no válido: {file_path}")
+            # Eliminar archivo
+            clean_files(file_path, False, 'invalid') #True
             return
 
         move = False
         if src == 'AZ':
-            move = amazon_scraping(soup, codigo, file_path, files_dir)
+            move, subdir = amazon_scraping(soup, codigo, file_path)
         if src == 'CC':
-            clean_files(file_path, files_dir, False, 'CC')  #True
-            # move = camel_scraping(soup)
+            move, subdir = camel_scraping(soup, codigo, file_path)
 
-        # Eliminar archivo y carpeta asociada
-        clean_files(file_path, files_dir, False, 'not-filtered') #True
+        # Eliminar archivo
+        clean_files(file_path, move, subdir)
 
     except Exception as e:
-        print(f"Error procesando {archivo}: {e}")
-        log("error_processing_files", f"Error processing file {archivo}: {e}")
-        # Eliminar archivo y carpeta asociada
-        clean_files(file_path, files_dir, False, 'excepciones') #True
+        print(f"Error procesando {file_path}: {e}")
+        log("error_processing_files", f"Error processing file {file_path}: {e}")
+        time.sleep(3)
+        # Eliminar archivo
+        clean_files(file_path, True, 'excepciones')
 
 import time
 from datetime import datetime, timedelta
 
 def main():
+    print("Iniciando scraping.")
     start_time = datetime.now()
-    max_runtime = timedelta(hours=0, minutes=58)  # Adjust the buffer as needed
+    minute_threshold = 58 # Min to interrup execution
+    path = './pages'
+    os.makedirs(path, exist_ok=True)
 
-    while True:
-        current_time = datetime.now()
-        elapsed_time = current_time - start_time
+    while datetime.now().minute < minute_threshold:
+        # Listar archivos HTML válidos
+        archivos = [f for f in os.listdir(path) if f.endswith('.mhtml')]
 
-        if elapsed_time >= max_runtime:
-            print(f"[{current_time}] Max runtime reached ({elapsed_time}). Exiting script.")
-            break
+        if not archivos:
+            print("No hay archivos HTML para procesar.")
+            time.sleep(30)
+            sys.exit()
 
-        procesar_archivo_mas_antiguo()
+        for archivo in archivos:
+            if datetime.now().minute >= minute_threshold:
+                break
+
+            file_path = os.path.join(path, archivo)
+            print()
+            print(f"*** {archivo} ***")
+            print()
+            procesar_archivo(file_path)
+            time.sleep(1)
+
         time.sleep(1)
+    
+    log("exit_scraping", f"Max runtime reached ({elapsed_time}). Exiting script.")
+    print(f"[{current_time}] Max runtime reached ({elapsed_time}). Exiting script.")
+    time.sleep(10)
 
 if __name__ == "__main__":
     main()

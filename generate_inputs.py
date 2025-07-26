@@ -7,15 +7,14 @@ from src.lib.timer import print_now
 from src.lib.cleaner import clean_old_entries
 from src.scripts.generate_sku_input_files import generate_sku_batches
 
-def start_scraping_process():
+def start_mercadolibre_process():
     # Ejecutar carga de nuevos codigos en la base de datos
     start_time = print_now("Inicia carga de nuevos codigos")
     add_new_items_to_db()
     print_now("Finaliza carga de nuevos codigos", start_time)
 
     # Limpiar archivos antiguos
-    # clean_old_entries("logs/", 15)
-    # clean_old_entries("pages/", 3)
+    clean_old_entries("logs/", 15)
 
     # Crear inputs para el proceso de descarga de paginas
     generate_sku_batches()
@@ -34,16 +33,19 @@ def monitor_input_folder(folder_path="src/autoit/inputs"):
 
         if file_count == 0:     # Podría cambiarse a 3 o 5 por proceso de DB? Evaluar
             print_now("Finaliza lectura de inputs")
-            start_scraping_process()
+            start_mercadolibre_process()
 
-        elif 10 < file_count <= 50:
+        elif 5 < file_count <= 30:
+            print_now("Reintentar en 1 hora")
             time.sleep(3600)  # 1 hour in seconds
             monitor_input_folder()
 
-        elif file_count <= 10:
+        elif file_count <= 5:
+            print_now("Reintentar en 10 minutos")
             time.sleep(600)  # 10 minutes in seconds
             monitor_input_folder()
 
+        time.sleep(30)
         
 
     except Exception as e:

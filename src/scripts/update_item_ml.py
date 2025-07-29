@@ -51,7 +51,7 @@ def update_item(file_path, sku, current_dollar_price, new_status=''):
         else:
             resultados = [rows[-1]]
     else:
-        print("Item not found in DB: sku: " + sku)
+        print(f"Item not found in DB: sku: {sku}")
         log("Item_not_found_in_db", f"Sku {sku} not found in DB. File path: {file_path}")
 
     for row in resultados:
@@ -77,7 +77,8 @@ def update_item(file_path, sku, current_dollar_price, new_status=''):
         if db_status == new_status and new_status == 'paused':
             return  # No action needed if status is already paused
 
-        new_price = get_updated_price(initial_pesos_price, initial_dollar_price, initial_dollar_value)
+        new_price = get_updated_price(initial_pesos_price, initial_dollar_price, initial_dollar_value, current_dollar_price)
+        print(f"Item {sku} ({item_id}) new price: {new_price} COP")
         log("updated_prices", f"Item {sku} ({item_id}) new price. Base price: {initial_pesos_price} to new price: {new_price} COP")
 
         # update_item_mercadolibre(item_id, new_price, new_status)
@@ -93,27 +94,44 @@ def update_item(file_path, sku, current_dollar_price, new_status=''):
     conn.close()
 
 
-def get_updated_price(initial_pesos_price, initial_dollar_price, initial_dollar_value):
-    current_dollar_value = get_trm_banrep()
-    
-    original_pesos = 50000
-    original_dolar = 4000
-    original_price_dollar = 12.5
-    
-    nuevo_dolar = 4100
-    new_price_dollar = 15
-    new_pesos = 60250chrome://settings/downloads
-            
-            
-            https://www.amazon.com/dp/B0CRBK4JR6
-            AZ-B0CRBK4JR6-1 
-    
-    Como calcular el new_pesos
-    
-    
-   
-https://www.amazon.com/dp/B0CQK7D9WK
-   
-    return int(initial_pesos_price)
+def get_updated_price(initial_pesos_price, initial_dollar_price, initial_dollar_value, current_dollar_price):
+    """
+    Si hay variacion del precio del producto:
+    - Calcular a trm original el nuevo valor en pesos.
+        Si el producto pasa de 10 a 15 dolares (Sumar 5 dolares al valor en pesos usando trm original):
 
-#update_item('B00000J48J', 10, 'active') # B002NSMERY, B07RNNMZW3, B00000J48J, B0D1FTH57Y, B0DNFSH3Y9
+    Si hay variación de la TRM del dólar:
+    - Calcular el valor definitivo del producto usando el paso anterior y una regla de tres.
+    """
+    # Get current dollar value from TRM
+    current_dollar_value = get_trm_banrep()
+
+    print(initial_pesos_price, initial_dollar_price, initial_dollar_value, current_dollar_price, current_dollar_value)
+
+    initial_pesos_price = float(initial_pesos_price)
+    initial_dollar_price = float(initial_dollar_price)
+    initial_dollar_value = float(initial_dollar_value)
+    current_dollar_price = float(current_dollar_price)
+    current_dollar_value = float(current_dollar_value)
+
+    print(initial_dollar_price, initial_dollar_value, current_dollar_price, current_dollar_value, initial_pesos_price)
+    # Variation of the product price
+
+    # Calculate price variation using original TRM
+    updated_pesos_price = initial_pesos_price + ((current_dollar_price - initial_dollar_price) * initial_dollar_value)
+
+    # Variation of the TRM
+    new_price_pesos = (current_dollar_value * updated_pesos_price) / initial_dollar_value
+    print(f"new_pesos_price: {new_price_pesos}")
+
+    # Calculate minimum price value
+    min_pesos_price = current_dollar_price * current_dollar_value * 1.5
+    print(f"Minimum pesos price: {min_pesos_price}")
+
+    new_price = round(max(new_price_pesos, min_pesos_price), -2) # redondear a múltiplos de 100
+
+    log("updated_prices_internal", f"De: {initial_pesos_price} A: {new_price}, [new_price_pesos: {new_price_pesos}, min_pesos_price: {min_pesos_price}] final_new_price: {new_price}, initial_dollar_price: {initial_dollar_price}, current_dollar_price: {current_dollar_price}], initial_dollar_value: {initial_dollar_value}, current_dollar_value: {current_dollar_value}")
+
+    return new_price
+
+# update_item('xxx', 'B002NSMERY', 130, 'active') # B002NSMERY, B07RNNMZW3, B00000J48J, B0D1FTH57Y, B0DNFSH3Y9

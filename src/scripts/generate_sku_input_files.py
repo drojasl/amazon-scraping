@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime
 from protected.config import DB_PATH
 
-def generate_sku_batches(batch_size=100, output_dir="src/autoit/inputs"):
+def generate_sku_batches(batch_size=10, output_dir="src/autoit/inputs"):
     output_prefix = f"AZ-{datetime.now().strftime('%d-%m-%Y')}"
 
     # Ensure output directory exists
@@ -16,7 +16,7 @@ def generate_sku_batches(batch_size=100, output_dir="src/autoit/inputs"):
     # Fetch all valid SKUs
     cursor.execute("""
         SELECT sku FROM items 
-        WHERE sku != 'N/A'
+        WHERE sku != 'N/A' AND status != 'softDeleted'
         ORDER BY updated_at ASC 
     """)
     all_items = [row[0] for row in cursor.fetchall()]

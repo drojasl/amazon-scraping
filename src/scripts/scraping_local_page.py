@@ -19,7 +19,7 @@ def get_line_count(filename):
         print(f"Error al contar líneas en el archivo {filename}: {e}")
         return -1
 
-def add_codigo_retries(codigo, base_path="src/autoit/inputs/", max_lines=100):
+def add_codigo_retries(codigo, base_path="src/autoit/inputs/", max_lines=10):
     if not os.path.exists(base_path):
         os.makedirs(base_path)
 
@@ -165,7 +165,7 @@ def get_price(soup, codigo, file_path):
             price_value = extract_price(price.get_text(strip=True))
             log("price_extracted", f"Item {codigo} price extracted: {price_value}")
             print(f"{codigo}: Precio encontrado: {price_value}")
-            # update_item(file_path, codigo, price_value, 'active')
+            update_item(file_path, codigo, price_value, 'active')
             return True
         else:
             print(f"{codigo}: No se encontró el precio.")
@@ -184,7 +184,7 @@ def get_price_cc(soup, codigo, file_path):
             if price_value != None:                
                 log("price_extracted", f"Item {codigo} price extracted: {price_value}")
                 print(f"{codigo}: Precio encontrado: {price_value}")
-                # update_item(file_path, codigo, price_value, 'active')
+                update_item(file_path, codigo, price_value, 'active')
                 return True
             else:
                 print(f"{codigo}: No se encontró el precio.")
@@ -202,17 +202,17 @@ def amazon_scraping(soup, codigo, file_path):
 
     if page_not_found(soup):
         log("page_not_found", f"Item {codigo} not found.")
-        # update_item(file_path, codigo, None, 'paused')
+        update_item(file_path, codigo, None, 'softDeleted')
         return [True, 'page_not_found']
 
     if item_not_available(soup):
         log("item_not_available", f"Item {codigo} not available.")
-        # update_item(file_path, codigo, None, 'paused')
+        update_item(file_path, codigo, None, 'paused')
         return [True, 'item_not_available']
 
     if item_cannot_be_sent(soup):
         log("item_cannot_be_sent", f"Item {codigo} cannot be sent.")
-        # update_item(file_path, codigo, None, 'paused')
+        update_item(file_path, codigo, None, 'paused')
         return [True, 'item_cannot_be_sent']
 
     if get_price(soup, codigo, file_path):
@@ -269,7 +269,7 @@ def main():
     print("Iniciando scraping.")
     start_time = datetime.now()
     minute_threshold = 58 # Min to interrup execution
-    path = './pages'
+    path = os.path.join(os.path.expanduser("~"), "Downloads")
     os.makedirs(path, exist_ok=True)
 
     while datetime.now().minute < minute_threshold:

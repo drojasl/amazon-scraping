@@ -35,6 +35,9 @@ def save_item_attributes(cursor, conn, in_db, item_id, dollar):
             status = body.get('status', 'unknown')
             sku_value = body.get('seller_custom_field') or body.get('seller_sku') or get_seller_sku_attribute(body.get('attributes'))
 
+            if status == 'under_review':
+                return
+
             if in_db == -1:
                 if sku_value != 'N/A':
                     cursor.execute("""

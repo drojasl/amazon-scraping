@@ -1,6 +1,6 @@
 Global $inputFolder = @ScriptDir & "\inputs"
-Global $loadWait = 1950
-Global $downloadWait = 400
+Global $loadWait = 2000
+Global $downloadWait = 500
 Global $startTimer = TimerInit()
 
 HotKeySet("^!p", "_PauseExecution") ; Ctrl+Alt+P para pausar la ejecución
@@ -9,9 +9,10 @@ HotKeySet("^!x", "_StopExecution") ; Ctrl+Alt+X para detener la ejecución
 _LogNow("Hora de Inicio:")
 
 Sleep(2000)
-
+_BackToBrowser()
 Local $counter = 1
-While $counter <= 1
+; 47
+While $counter <= 47
 	Send("{ESC}")
 	Local $searchHandle = FileFindFirstFile($inputFolder & "\*.txt")
 
@@ -31,8 +32,8 @@ While $counter <= 1
 			ContinueLoop
 		EndIf
 
-		; Ejecutar solo si estamos antes del minuto 48
-		If @MIN >= 48 Then
+		; Ejecutar solo si estamos antes del minuto 57
+		If @MIN >= 57 Then
 			_LogNow("Muy cerca de la siguiente ejecucion automatica")
 			_LogEnd()
 			Exit
@@ -78,11 +79,9 @@ EndFunc
 
 ;--------------------------------------------
 Func _Save($codes, $source)
-	_ValidateDownloadsFolder()
 	Local $i = 1
 	For $code In $codes
-		Sleep(400)
-
+		_BackToBrowser()
 		Local $url = "https://www.amazon.com/dp/" & $code
 		If $source = 'CC' Then
 			$url = "https://camelcamelcamel.com/product/" & $code
@@ -92,18 +91,18 @@ Func _Save($codes, $source)
 		Send("{F6}")
 		Sleep(500)
 		Send("^v")
-		Sleep(400)
+		Sleep(500)
 		Send("{Enter}")
 
 		Local $fileName = $source & "-" & $code & "-" & $i
-		ClipPut($fileName)
+		;ClipPut($fileName)
 		Sleep($loadWait)
 		ClipPut($fileName)
 
 		Send("^s")
 		Sleep($loadWait)
 		Send("^v")
-		Sleep(600)
+		Sleep(700)
 		
 		If $i = 1 Then
 			Send("{TAB}")
@@ -129,35 +128,15 @@ Func _Save($codes, $source)
 		Send("{Enter}")
 
 		Sleep($downloadWait)
+		Send("{ESC}")
 		_LogNow($i & " " & $code)
-		_BackToBrowser()
-		Send("^{TAB}")
 		$i += 1
 	Next
 EndFunc
 
-Func _ValidateDownloadsFolder()
-	_BackToBrowser()
-	Local $url = "chrome://settings/downloads"
-	ClipPut($url)
-	Send("{F6}")
-	Sleep(1000)
-	Send("^v")
-	Sleep(500)
-	Send("{Enter}")
-	Sleep(2000)
-	Send("{TAB}")
-	Sleep(500)
-	Send("{TAB}")
-	Sleep(500)
-	Send("{Enter}")
-	Sleep(2000)
-	Send("{Enter}")
-EndFunc
-
 Func _BackToBrowser()
 	MouseClick("left", 0, 140)
-	Sleep(50)
+	Sleep(40)
 EndFunc
 
 Func _StopExecution()

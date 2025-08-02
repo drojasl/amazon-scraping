@@ -12,10 +12,8 @@ def get_headers():
     token = get_validated_token()
     return {'Authorization': f"Bearer {token}"}
 
-def add_new_items_to_db():
+def add_new_items_to_db(page=1, scroll_id=None):
     start_time = time.time()
-    scroll_id = None
-    page = 1
     dollar_rate = get_trm_banrep()
     base_url = f"{API_URL}/users/{SELLER_ID}/items/search?search_type=scan"
     more_items = True
@@ -58,12 +56,18 @@ def add_new_items_to_db():
             page += 1
 
     except requests.exceptions.RequestException as req_err:
-        log("add_new_items_to_db", f"API request failed: {req_err}")
+        log("add_new_items_to_db", f"Page: {page} Scroll ID: {scroll_id}. API request failed: {req_err}")
         print(f"❌ API Request Error: {req_err}")
+        print(f"Page: {page} Scroll ID: {scroll_id}")
+        # Retry
+        add_new_items_to_db(page, scroll_id)
 
     except Exception as general_err:
-        log("add_new_items_to_db", f"Unexpected error: {general_err}")
+        log("add_new_items_to_db", f"Page: {page} Scroll ID: {scroll_id}. Unexpected error: {general_err}")
         print(f"❌ Unexpected Error: {general_err}")
+        # Retry
+        print(f"Page: {page} Scroll ID: {scroll_id}")
+        add_new_items_to_db(page, scroll_id)
 
     finally:
         try:

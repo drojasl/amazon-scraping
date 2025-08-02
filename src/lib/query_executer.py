@@ -70,9 +70,100 @@ WHERE item_id = 'MCO2693059922e'
 '''
 query = """
 UPDATE items
-SET base_dollar_price = NULL, updated_at = datetime('now')
-WHERE item_id IN ('MCO2896566652', 'MCO1447078233')
+SET base_dollar_price = 138.48, updated_at = datetime('now')
+WHERE item_id IN ('MCO1801849336')
 """
-''''
+'''
 
-ejecutar(query, 'protected/db/mercadolibre.db')
+
+query = """
+SELECT 'https://articulo.mercadolibre.com.co/MCO-' || SUBSTR(item_id, 4), sku, status, base_dollar_price
+FROM items
+WHERE sku IN (
+'B087DZFQ8B',
+'B088NM3Z7S',
+'B08799BRLM',
+'B086M8PL8P',
+'B089KPQH4V',
+'B083JVB21K',
+'B083KK2S98',
+'B081SWQKR4',
+'B085VT6F1S',
+'B083B6XPVZ',
+'B082SVJWD8',
+'B081STKP4W',
+'B083W2V3PV',
+'B085M52JTP',
+'B085D97MNX',
+'B086YDZM3P',
+'B084Z17NTD',
+'B084RJRXB6',
+'B083VT17V3',
+'B07BB9515J',
+'B079GGYQ62',
+'B00004SRCS',
+'B00009R9EZ',
+'B0000515I6',
+'B00A3ZE1SE',
+'B002KINBHY',
+'B001RLQNSO',
+'B000GEDSPE',
+'B0077UY4FI',
+'B002NCTEVE',
+'B002LE8PDM',
+'B07CVVDMVF',
+'B075MPML9D',
+'B00SKU47RE',
+'B00JRD13T8',
+'B00JZW4DCA',
+'B00AQSTAJ8',
+'B000WIV45U',
+'B000ALILGO',
+'B019Z3P8ZY',
+'B00ZC1NQBC',
+'B01F6XWPOY',
+'B00XBCY7X0',
+'B00V05BD1O',
+'B00UOTEPJE',
+'B00UOTER9W',
+'B00XBE8Q1W',
+'B00V067A38',
+'B00V063PKK',
+'B00SINNRAG',
+'B00NTTH35Y',
+'B00MZ8B6G2',
+'B00LQXHX4Q',
+'B00FHU94IW',
+'B00DRIL27W',
+'B00DQCT33Y',
+'B004R7QUSI',
+'B003XB9ZSQ',
+'B003HEQJZQ',
+'B00205KJM2'
+);
+"""
+
+
+'''
+query = """
+DELETE FROM items 
+WHERE status = 'under_review'
+"""
+'''
+
+'''
+query = """
+    ALTER TABLE items
+    ADD COLUMN deleted_at TIMESTAMP NULL DEFAULT NULL
+"""
+'''
+
+'''
+query = """
+SELECT item_id, status, sku
+FROM items
+WHERE base_dollar_price IS NOT NULL
+"""
+'''
+
+ejecutar_consulta(query, 'protected/db/mercadolibre.db')

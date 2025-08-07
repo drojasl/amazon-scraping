@@ -46,8 +46,8 @@ def update_item_mercadolibre(item_id, new_price, new_status):
 def extract_code_from_path(file_path):
     filename = os.path.basename(file_path)
 
-    # Verifica si comienza con AZ- o CC- y extrae el código
-    match = re.match(r'^(AZ|CC)-([A-Z0-9]{10})-\d+\.mhtml$', filename)
+    # Verifica si comienza con AZ- y extrae el código
+    match = re.match(r'^(AZ)-([A-Z0-9]{10})-\d+\.mhtml$', filename)
     if match:
         return match.group(2)  # El grupo 2 contiene el código
     return None

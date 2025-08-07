@@ -7,7 +7,7 @@ def log(nombre_base_archivo, mensaje):
     os.makedirs(carpeta_logs, exist_ok=True)
 
     # Obtener fecha actual para el nombre del archivo
-    fecha_hoy = "" #datetime.now().strftime("%Y-%m-%d")
+    fecha_hoy = datetime.now().strftime("%Y-%m-%d")
     nombre_archivo_con_fecha = f"{nombre_base_archivo}_{fecha_hoy}.log"
 
     # Ruta completa al archivo

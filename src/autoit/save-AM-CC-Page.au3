@@ -1,6 +1,6 @@
 Global $inputFolder = @ScriptDir & "\inputs"
-Global $loadWait = 2000
-Global $downloadWait = 500
+Global $loadWait = 2500
+Global $downloadWait = 1000
 Global $startTimer = TimerInit()
 
 HotKeySet("^!p", "_PauseExecution") ; Ctrl+Alt+P para pausar la ejecución
@@ -11,8 +11,8 @@ _LogNow("Hora de Inicio:")
 Sleep(2000)
 _BackToBrowser()
 Local $counter = 1
-; 47
-While $counter <= 47
+; 48
+While $counter < 35
 	Send("{ESC}")
 	Local $searchHandle = FileFindFirstFile($inputFolder & "\*.txt")
 
@@ -94,32 +94,22 @@ Func _Save($codes, $source)
 		Sleep(500)
 		Send("{Enter}")
 
-		Local $fileName = $source & "-" & $code & "-" & $i
+		Local $fileName = $code & "-" & $i
 		;ClipPut($fileName)
+		ClipPut($source)
 		Sleep($loadWait)
-		ClipPut($fileName)
+		ClipPut($source)
 
 		Send("^s")
 		Sleep($loadWait)
 		Send("^v")
-		Sleep(700)
-		
-		If $i = 1 Then
-			Send("{TAB}")
-			Sleep(300)
-    		Send("{DOWN}")
-			Sleep(200)
-    		Send("{DOWN}")
-			Sleep(200)
-    		Send("{DOWN}")
-			Sleep(200)
-    		Send("{DOWN}")
-			Sleep(300)
-    		Send("{UP}")
-			Sleep(300)
-			Send("{Enter}")
-			Sleep(300)
-		EndIf
+		Sleep(100)
+		ClipPut($fileName)
+		Send("-")
+		Sleep(50)
+		ClipPut($fileName)
+		Send("^v")
+		Sleep(1000)
 
 		Send("{Enter}")
 		Sleep(300)
@@ -128,15 +118,17 @@ Func _Save($codes, $source)
 		Send("{Enter}")
 
 		Sleep($downloadWait)
-		Send("{ESC}")
 		_LogNow($i & " " & $code)
 		$i += 1
 	Next
 EndFunc
 
 Func _BackToBrowser()
+	MouseClick("left", 60, 30)
+	Sleep(20)
+	Send("{ESC}")
 	MouseClick("left", 0, 140)
-	Sleep(40)
+	Sleep(20)
 EndFunc
 
 Func _StopExecution()

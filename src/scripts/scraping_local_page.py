@@ -88,11 +88,6 @@ def extract_price(valor_str):
     return None
 
 def clean_files(file_path, move=True, subdir='otros'):
-    print(file_path)
-    print()
-    print(move)
-    print()
-    print(subdir)
     move=True
     if move:
         print(subdir, file_path)
@@ -268,7 +263,7 @@ from datetime import datetime, timedelta
 def main():
     print("Iniciando scraping.")
     start_time = datetime.now()
-    minute_threshold = 58 # Min to interrup execution
+    minute_threshold = 57 # Min to interrup execution
     path = os.path.join(os.path.expanduser("~"), "Downloads")
     os.makedirs(path, exist_ok=True)
 

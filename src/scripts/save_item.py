@@ -1,7 +1,7 @@
 import sys
 import requests
 import sqlite3
-from protected.config import API_URL, DB_PATH
+from protected.config import API_URL
 from src.scripts.auth import get_access_token, get_validated_token
 
 def get_seller_sku_attribute(attributes):

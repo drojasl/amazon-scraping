@@ -1,7 +1,8 @@
 import sqlite3
-from protected.config import DB_PATH
+from protected.config import get_db_path
 
 # 1. Conectar a la base de datos (se crea si no existe)
+DB_PATH = get_db_path()
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 

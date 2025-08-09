@@ -1,7 +1,8 @@
 import sqlite3
-from protected.config import DB_PATH
+from protected.config import get_db_path
 
-def ejecutar(query, db_path=DB_PATH):
+def ejecutar(query, db_path=get_db_path()):
+    print(f"Ejecutando en: {db_path}")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -10,8 +11,8 @@ def ejecutar(query, db_path=DB_PATH):
     conn.commit()
     conn.close()
 
-def ejecutar_consulta(query, db_path=DB_PATH):
-
+def ejecutar_consulta(query, db_path=get_db_path()):
+    print(f"Ejecutando en: {db_path}")
     try:
         # Conexión a la base de datos
         conn = sqlite3.connect(db_path)
@@ -158,12 +159,10 @@ query = """
 """
 '''
 
-'''
 query = """
 SELECT item_id, status, sku
 FROM items
 WHERE base_dollar_price IS NOT NULL
 """
-'''
 
-ejecutar_consulta(query, 'protected/db/mercadolibre.db')
+ejecutar_consulta(query)

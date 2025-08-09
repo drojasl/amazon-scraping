@@ -4,7 +4,7 @@ import requests
 import sqlite3
 import os
 import re
-from protected.config import API_URL, DB_PATH
+from protected.config import API_URL, get_db_path
 from src.scripts.auth import get_access_token, get_validated_token
 from src.lib.dolar_hoy import get_trm_banrep
 from src.lib.logger import log
@@ -53,6 +53,7 @@ def extract_code_from_path(file_path):
     return None
 
 def update_item(file_path, sku, current_dollar_price, new_status=''):
+    DB_PATH = get_db_path()
     print(f"Updating item {sku} with current dollar price: {current_dollar_price} and new status: {new_status}")
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()

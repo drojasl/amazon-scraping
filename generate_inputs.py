@@ -6,8 +6,11 @@ from src.scripts.add_new_items_to_db import add_new_items_to_db
 from src.lib.timer import print_now
 from src.lib.cleaner import clean_old_entries
 from src.scripts.generate_sku_input_files import generate_sku_batches
+from src.scripts.switch_seller_id import switch_seller_id
 
 def start_mercadolibre_process():
+    switch_seller_id()
+
     # Ejecutar carga de nuevos codigos en la base de datos
     start_time = print_now("Inicia carga de nuevos codigos")
     add_new_items_to_db()

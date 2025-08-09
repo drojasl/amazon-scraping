@@ -1,9 +1,10 @@
 import os
 import sqlite3
 from datetime import datetime
-from protected.config import DB_PATH
+from protected.config import get_db_path
 
 def generate_sku_batches(batch_size=10, output_dir="src/autoit/inputs"):
+    DB_PATH = get_db_path()
     output_prefix = f"AZ-{datetime.now().strftime('%d-%m-%Y')}"
 
     # Ensure output directory exists

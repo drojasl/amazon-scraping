@@ -1,4 +1,4 @@
-from protected.config import API_URL, CLIENT_ID, SECRET_KEY, DB_PATH, SELLER_ID
+from protected.config import API_URL, CLIENT_ID, SECRET_KEY, get_db_path, get_seller_id
 import sys
 import sqlite3
 import requests
@@ -12,6 +12,7 @@ def get_validated_token():
 
 
 def get_access_token():
+    DB_PATH = get_db_path()
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
@@ -30,6 +31,7 @@ def get_access_token():
 
 def refresh_access_token(refresh):
     """Refresca el token de acceso y actualiza la base de datos"""
+    DB_PATH = get_db_path()
     try:
         url = f"{API_URL}/oauth/token"
         
@@ -84,6 +86,8 @@ def refresh_access_token(refresh):
 
 
 def validate_token(token, refresh):
+    SELLER_ID = get_seller_id()
+
     url = API_URL + "/users/" + SELLER_ID + "/items/search?"
 
     payload = {}

@@ -1,7 +1,7 @@
 import time
 import requests
 import sqlite3
-from protected.config import API_URL, SELLER_ID, DB_PATH
+from protected.config import API_URL, get_seller_id, get_db_path
 from src.scripts.auth import get_validated_token
 from src.lib.dolar_hoy import get_trm_banrep
 from src.scripts.save_item import save_item_attributes
@@ -13,6 +13,9 @@ def get_headers():
     return {'Authorization': f"Bearer {token}"}
 
 def add_new_items_to_db(page=1, scroll_id=None):
+    SELLER_ID = get_seller_id()
+    DB_PATH = get_db_path()
+    print(f"Iniciando carga de nuevos items a la base de datos...{SELLER_ID} {DB_PATH}")
     start_time = time.time()
     dollar_rate = get_trm_banrep()
     base_url = f"{API_URL}/users/{SELLER_ID}/items/search?search_type=scan"
@@ -28,7 +31,7 @@ def add_new_items_to_db(page=1, scroll_id=None):
             time.sleep(1)  # avoid hitting API rate limits
 
             # Refresh headers every 100 pages
-            if page % 100 == 0:
+            if page % 10 == 0:
                 print(f"Page: {page}")
                 headers = get_headers()
 
@@ -54,6 +57,8 @@ def add_new_items_to_db(page=1, scroll_id=None):
                     log("add_new_items_to_db", f"Error processing item {item_id}: {item_error}")
 
             page += 1
+            if page >= 25:
+                more_items = False #REMOVE THIS LIMIT AFTER TESTING
 
     except requests.exceptions.RequestException as req_err:
         log("add_new_items_to_db", f"Page: {page} Scroll ID: {scroll_id}. API request failed: {req_err}")

@@ -1,6 +1,6 @@
 Global $inputFolder = @ScriptDir & "\inputs"
-Global $loadWait = 2500
-Global $downloadWait = 1000
+Global $loadWait = 2200
+Global $downloadWait = 900
 Global $startTimer = TimerInit()
 
 HotKeySet("^!p", "_PauseExecution") ; Ctrl+Alt+P para pausar la ejecución
@@ -95,7 +95,6 @@ Func _Save($codes, $source)
 		Send("{Enter}")
 
 		Local $fileName = $code & "-" & $i
-		;ClipPut($fileName)
 		ClipPut($source)
 		Sleep($loadWait)
 		ClipPut($source)
@@ -124,7 +123,7 @@ Func _Save($codes, $source)
 EndFunc
 
 Func _BackToBrowser()
-	MouseClick("left", 60, 30)
+	MouseClick("left", 100, 30)
 	Sleep(20)
 	Send("{ESC}")
 	MouseClick("left", 0, 140)

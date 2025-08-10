@@ -88,9 +88,8 @@ def extract_price(valor_str):
     return None
 
 def clean_files(file_path, move=True, subdir='otros'):
-    move=True
+    move=False
     if move:
-        print(subdir, file_path)
         destino_dir = os.path.join("pages", subdir)
         os.makedirs(destino_dir, exist_ok=True)
 

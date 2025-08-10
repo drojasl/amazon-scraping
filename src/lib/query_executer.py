@@ -159,10 +159,18 @@ query = """
 """
 '''
 
+'''
 query = """
 SELECT item_id, status, sku
 FROM items
 WHERE base_dollar_price IS NOT NULL
+"""
+'''
+
+query = """
+SELECT COUNT(sku) FROM items 
+WHERE sku != 'N/A' AND status != 'softDeleted'
+ORDER BY updated_at ASC 
 """
 
 ejecutar_consulta(query)

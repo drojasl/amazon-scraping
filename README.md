@@ -24,3 +24,6 @@ python -m src.scripts.get_sku_list
 
 python -m index
 python -m src.scripts.scraping_local_page
+
+# execute query
+python -m src.lib.query_executer

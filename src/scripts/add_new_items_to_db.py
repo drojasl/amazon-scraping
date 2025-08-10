@@ -31,7 +31,7 @@ def add_new_items_to_db(page=1, scroll_id=None):
             time.sleep(1)  # avoid hitting API rate limits
 
             # Refresh headers every 100 pages
-            if page % 10 == 0:
+            if page % 100 == 0:
                 print(f"Page: {page}")
                 headers = get_headers()
 
@@ -57,8 +57,6 @@ def add_new_items_to_db(page=1, scroll_id=None):
                     log("add_new_items_to_db", f"Error processing item {item_id}: {item_error}")
 
             page += 1
-            if page >= 25:
-                more_items = False #REMOVE THIS LIMIT AFTER TESTING
 
     except requests.exceptions.RequestException as req_err:
         log("add_new_items_to_db", f"Page: {page} Scroll ID: {scroll_id}. API request failed: {req_err}")

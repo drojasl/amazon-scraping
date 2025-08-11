@@ -12,7 +12,7 @@ Sleep(2000)
 _BackToBrowser()
 Local $counter = 1
 ; 48
-While $counter < 35
+While $counter <= 37
 	Send("{ESC}")
 	Local $searchHandle = FileFindFirstFile($inputFolder & "\*.txt")
 

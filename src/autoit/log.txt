@@ -1,5 +1,4 @@
-Hora de Inicio: 09:29:11
-1 Archivo a procesar: AZ-02-08-2025_6411.txt 09:29:15
-1 B0C7Q2NX2H 09:29:24
-FIN -> Tiempo transcurrido: 0h 0m 21s 09:29:33
-Hora de finalizacion: 09:29:33
+Hora de Inicio: 10:00:11
+No hay archivos para procesar. Exit 10:00:14
+FIN -> Tiempo transcurrido: 0h 0m 3s 10:00:14
+Hora de finalizacion: 10:00:14

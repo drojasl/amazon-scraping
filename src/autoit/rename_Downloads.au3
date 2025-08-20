@@ -9,7 +9,7 @@ Sleep(500)
 Send("{END}")
 	
 Local $i = 1
-While $i <= 10
+While $i <= 25
     Sleep(500)
     Send("{F2}")
 	Sleep(500)
@@ -24,7 +24,7 @@ While $i <= 10
     $copiedText = ClipGet()
 
     ; Evalúa si el texto comienza con "AZ-" o "CC-"
-    If StringLeft($copiedText, 3) = "AZ-" Or StringLeft($copiedText, 3) = "CC-" Or StringLeft($copiedText, 3) = "123" Then
+    If StringLeft($copiedText, 3) = "AZ-" Or StringLeft($copiedText, 3) = "CC-" Or StringLeft($copiedText, 3) = "123" Or @MIN = 0 Then
 		Send("{ESC}")
         ExitLoop
     EndIf

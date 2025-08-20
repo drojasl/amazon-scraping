@@ -32,7 +32,7 @@ def add_new_items_to_db(page=1, scroll_id=None):
 
             # Refresh headers every 100 pages
             if page % 100 == 0:
-                print(f"Page: {page}")
+                print(f"Page: {page} scroll_id: {scroll_id}")
                 headers = get_headers()
 
             url = f"{base_url}&scroll_id={scroll_id}" if scroll_id else base_url

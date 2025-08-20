@@ -11,7 +11,7 @@ _LogNow("Hora de Inicio:")
 Sleep(2000)
 _BackToBrowser()
 Local $counter = 1
-; 48
+
 While $counter <= 37
 	Send("{ESC}")
 	Local $searchHandle = FileFindFirstFile($inputFolder & "\*.txt")
@@ -85,6 +85,7 @@ Func _Save($codes, $source)
 		Local $url = "https://www.amazon.com/dp/" & $code
 		If $source = 'CC' Then
 			$url = "https://camelcamelcamel.com/product/" & $code
+			$loadWait = 3000
 		EndIf
 
 		ClipPut($url)

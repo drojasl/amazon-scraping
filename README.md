@@ -22,8 +22,12 @@ python -m src.scripts.get_sku_list
 
 # running every hour
 
-python -m index
+python -m generate_inputs
 python -m src.scripts.scraping_local_page
 
 # execute query
 python -m src.lib.query_executer
+
+# ID de Cuentas
+Carlos = "85062679"
+ANA = "36362702"
